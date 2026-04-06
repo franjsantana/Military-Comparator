@@ -1,0 +1,276 @@
+@page "/admin/add-vehicle"
+@rendermode InteractiveServer
+@inject IMilitaryDataService DataService
+@inject NavigationManager Navigation
+@inject AdminState AdminState
+
+<PageTitle>Añadir Blindado - MilitaryComparator</PageTitle>
+
+<div class="container my-5">
+    @if (!AdminState.IsAuthenticated)
+
+    {
+        <div class="alert alert-warning text-center">
+            <h3>Acceso denegado</h3>
+            <p>Debes autenticarte en el panel principal primero.</p>
+            <a href="/admin" class="btn btn-primary">Ir al Login</a>
+        </div>
+    }
+
+    else
+
+    {
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="d-flex align-items-center mb-4">
+                    <a href="/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <h1 class="mb-0">Nuevo Vehículo Blindado</h1>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <EditForm Model="@vehicle" OnValidSubmit="HandleSubmit" FormName="AddVehicleForm">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="row g-4">
+                                <!-- Información Básica -->
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 font-weight-bold text-primary">Información General</h5>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Nombre</label>
+                                    <InputText @bind-Value="vehicle.Name" class="form-control"
+                                        placeholder="ej. Leopard 2A7" />
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label">Año en servicio</label>
+                                    <InputNumber @bind-Value="vehicle.Year" class="form-control" />
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label">Tripulantes</label>
+                                    <InputNumber @bind-Value="vehicle.Crew" class="form-control" />
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label">Pasajeros</label>
+                                    <InputNumber @bind-Value="vehicle.Passengers" class="form-control" />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Nación</label>
+                                    <InputSelect @bind-Value="vehicle.NationId" class="form-select">
+                                        <option value="0">Selecciona una nación...</option>
+                                        @foreach (var nation in nations)
+
+                                        {
+                                            <option value="@nation.Id">@nation.Name</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Tipo de Vehículo</label>
+                                    <InputSelect @bind-Value="vehicle.VehicleType" class="form-select">
+                                        @foreach (var type in Enum.GetValues<VehicleType>())
+
+                                        {
+                                            <option value="@type">@type</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">URL de la Imagen</label>
+                                    <InputText @bind-Value="vehicle.ImageUrl" class="form-control"
+                                        placeholder="https://..." />
+                                    @if (!string.IsNullOrEmpty(vehicle.ImageUrl))
+
+                                    {
+                                        <div class="mt-3 text-center">
+                                            <p class="small text-muted mb-2">Vista previa de la imagen:</p>
+                                            <img src="@vehicle.ImageUrl" class="rounded shadow-sm"
+                                                style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Dimensiones y Masa -->
+                                <div class="col-12 mt-4">
+                                    <h5 class="border-bottom pb-2 font-weight-bold text-primary">Dimensiones y Masa</h5>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Longitud (m)</label>
+                                    <InputNumber @bind-Value="vehicle.Length" class="form-control" step="0.01" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Ancho (m)</label>
+                                    <InputNumber @bind-Value="vehicle.Width" class="form-control" step="0.01" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Alto (m)</label>
+                                    <InputNumber @bind-Value="vehicle.Height" class="form-control" step="0.01" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Peso (t)</label>
+                                    <InputNumber @bind-Value="vehicle.Weight" class="form-control" step="0.1" />
+                                </div>
+
+                                <!-- Propulsión -->
+                                <div class="col-12 mt-4">
+                                    <h5 class="border-bottom pb-2 font-weight-bold text-primary">Propulsión y Motores</h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Motor</label>
+                                    <InputText @bind-Value="vehicle.Engine" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Potencia (HP)</label>
+                                    <InputNumber @bind-Value="vehicle.EnginePower" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Transmisión</label>
+                                    <InputText @bind-Value="vehicle.Transmission" class="form-control" />
+                                </div>
+
+                                <!-- Desempeño -->
+                                <div class="col-12 mt-4">
+                                    <h5 class="border-bottom pb-2 font-weight-bold text-primary">Rendimiento y Movilidad
+                                    </h5>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Velocidad Carretera (km/h)</label>
+                                    <InputNumber @bind-Value="vehicle.MaxSpeedRoad" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Velocidad Off-Road (km/h)</label>
+                                    <InputNumber @bind-Value="vehicle.MaxSpeedOffRoad" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Autonomía (km)</label>
+                                    <InputNumber @bind-Value="vehicle.Range" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Suspensión</label>
+                                    <InputText @bind-Value="vehicle.Suspension" class="form-control" />
+                                </div>
+
+                                <!-- Armamento -->
+                                <div class="col-12 mt-4">
+                                    <h5 class="border-bottom pb-2 font-weight-bold text-primary">Armamento y Blindaje</h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Armamento Principal</label>
+                                    <InputText @bind-Value="vehicle.MainArmament" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Armamento Secundario</label>
+                                    <InputText @bind-Value="vehicle.SecondaryArmament" class="form-control" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Blindaje (Descripción Técnica)</label>
+                                    <InputTextArea @bind-Value="vehicle.Armor" class="form-control" rows="3" />
+                                </div>
+
+                                <!-- Producción -->
+                                <div class="col-12 mt-4">
+                                    <h5 class="border-bottom pb-2 font-weight-bold text-primary">Historial y Producción</h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Unidades Producidas</label>
+                                    <InputNumber @bind-Value="vehicle.TotalProduced" class="form-control" />
+                                </div>
+
+                                <div class="col-12 mt-5">
+                                    <div class="d-flex justify-content-end gap-3">
+                                        <button type="button" class="btn btn-light px-5"
+                                            @onclick='() => Navigation.NavigateTo("/admin")'>Cancelar</button>
+                                        <button type="submit" class="btn btn-primary px-5 py-3 shadow">Guardar
+                                            Blindado</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? sourceId { get; set; }
+
+    private ArmoredVehicle vehicle = new();
+    private List<Nation> nations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AdminState.IsAuthenticated)
+        {
+            nations = await DataService.GetAllNationsAsync();
+            
+            if (sourceId.HasValue)
+            {
+                var source = await DataService.GetVehicleByIdAsync(sourceId.Value);
+                if (source != null)
+                {
+                    // Pre-fill with source data (creating a new instance)
+                    vehicle = new ArmoredVehicle
+                    {
+                        Name = source.Name + " (Copia)",
+                        ImageUrl = source.ImageUrl,
+                        VehicleType = source.VehicleType,
+                        Year = source.Year,
+                        Length = source.Length,
+                        Width = source.Width,
+                        Height = source.Height,
+                        Weight = source.Weight,
+                        Engine = source.Engine,
+                        EnginePower = source.EnginePower,
+                        Transmission = source.Transmission,
+                        MaxSpeedRoad = source.MaxSpeedRoad,
+                        MaxSpeedOffRoad = source.MaxSpeedOffRoad,
+                        Suspension = source.Suspension,
+                        Range = source.Range,
+                        MainArmament = source.MainArmament,
+                        SecondaryArmament = source.SecondaryArmament,
+                        Armor = source.Armor,
+                        Crew = source.Crew,
+                        Passengers = source.Passengers,
+                        TotalProduced = source.TotalProduced,
+                        NationId = source.NationId
+                    };
+                }
+            }
+            else
+            {
+                vehicle.VehicleType = VehicleType.MBT;
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/admin");
+        }
+    }
+
+
+
+    private async Task HandleSubmit()
+
+    {
+
+        if (vehicle.NationId == 0) return;
+
+        await DataService.AddVehicleAsync(vehicle);
+
+        Navigation.NavigateTo("/admin");
+
+    }
+}

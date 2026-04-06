@@ -1,0 +1,98 @@
+@using MilitaryComparator.Services
+@using MilitaryComparator.Models.Entities
+@inject IMilitaryDataService MilitaryData
+@inject NavigationManager Nav
+
+<nav class="main-nav d-flex align-items-center justify-content-between px-3">
+    <ul class="nav flex-row align-items-center mb-0">
+        <li class="nav-item px-2">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="bi bi-house-door-fill me-1"></i> Inicio
+            </NavLink>
+        </li>
+        <li class="nav-item px-2">
+            <NavLink class="nav-link" href="/nations">
+                <i class="bi bi-globe me-1"></i> Naciones
+            </NavLink>
+        </li>
+        <li class="nav-item px-2">
+            <NavLink class="nav-link" href="/vehicles">
+                <i class="bi bi-shield-shaded me-1"></i> Blindados
+            </NavLink>
+        </li>
+        <li class="nav-item px-2">
+            <NavLink class="nav-link" href="/comparator">
+                <i class="bi bi-arrow-left-right me-1"></i> Comparador
+            </NavLink>
+        </li>
+    </ul>
+
+    <div class="search-container ms-auto d-none d-md-block" style="width: 300px;">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" 
+                   class="form-control border-start-0 rounded-end-pill pe-3" 
+                   placeholder="Buscar blindado..." 
+                   list="vehicleOptions" 
+                   @bind="_searchTerm"
+                   @bind:event="oninput"
+                   @onchange="OnSearchSelected" />
+            <datalist id="vehicleOptions">
+                @if (_allVehicles != null)
+                {
+                    @foreach (var v in _allVehicles)
+                    {
+                        <option value="@v.Name">@v.Nation?.Name</option>
+                    }
+                }
+            </datalist>
+        </div>
+    </div>
+</nav>
+
+<style>
+    .main-nav {
+        background-color: #1a1a1a;
+        padding: 0.8rem 0;
+    }
+    .nav-link {
+        color: #b0b0b0 !important;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+    .nav-link:hover, .nav-link.active {
+        color: #ffffff !important;
+    }
+    .search-container .form-control:focus {
+        box-shadow: none;
+        border-color: #dee2e6;
+    }
+    .search-container .input-group-text {
+        border-right: none;
+    }
+</style>
+
+@code {
+    private List<ArmoredVehicle>? _allVehicles;
+    private string? _searchTerm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allVehicles = await MilitaryData.GetAllVehiclesAsync();
+    }
+
+    private void OnSearchSelected(ChangeEventArgs e)
+    {
+        var selection = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(selection)) return;
+
+        var vehicle = _allVehicles?.FirstOrDefault(v => v.Name.Equals(selection, StringComparison.OrdinalIgnoreCase));
+        if (vehicle != null)
+        {
+            _searchTerm = ""; // Clear for next use
+            Nav.NavigateTo($"/vehicles?selectedId={vehicle.Id}", forceLoad: true);
+        }
+    }
+}

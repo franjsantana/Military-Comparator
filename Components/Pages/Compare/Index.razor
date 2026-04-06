@@ -1,0 +1,81 @@
+@page "/comparator"
+@rendermode InteractiveServer
+@using MilitaryComparator.Services
+@using MilitaryComparator.Models.Entities
+@inject ComparisonState State
+@inject NavigationManager Nav
+@implements IDisposable
+
+<PageTitle>Comparador - MilitaryComparator</PageTitle>
+
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4 text-center">Comparador de Blindados</h1>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+        @for (int i = 0; i < ComparisonState.MaxComparisonLimit; i++)
+        {
+            var index = i;
+            var vehicle = index < State.SelectedVehicles.Count ? State.SelectedVehicles[index] : null;
+
+            <div class="col">
+                <div class="card h-100 shadow-sm" style="border: 2px dashed #ccc;">
+                    @if (vehicle != null)
+                    {
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <button class="btn btn-sm btn-danger rounded-circle" @onclick="() => Remove(index)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                        <img src="@vehicle.ImageUrl" class="card-img-top" alt="@vehicle.Name" style="height: 150px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@vehicle.Name</h5>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center p-5">
+                            <i class="bi bi-plus-circle-dotted display-4 text-muted mb-3"></i>
+                            <button class="btn btn-outline-primary" @onclick="() => GoToSelect(index)">
+                                Seleccionar Blindado
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (State.SelectedVehicles.Count >= 2)
+    {
+        <div class="text-center">
+            <button class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow" @onclick="GoToResults">
+                <i class="bi bi-arrow-left-right me-2"></i> Comparar Blindados
+            </button>
+            <div class="mt-3">
+                <button class="btn btn-link text-danger" @onclick="State.Clear">Limpiar todo</button>
+            </div>
+        </div>
+    }
+    else if (State.SelectedVehicles.Any())
+    {
+        <div class="alert alert-warning text-center">
+            Selecciona al menos dos vehículos para comparar.
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
+
+    private void Remove(int index) => State.RemoveVehicle(index);
+    private void GoToSelect(int index) => Nav.NavigateTo($"/comparator/select/{index}");
+    private void GoToResults() => Nav.NavigateTo("/comparator/results");
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+}

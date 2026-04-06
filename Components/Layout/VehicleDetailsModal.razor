@@ -1,0 +1,102 @@
+@using MilitaryComparator.Models.Entities
+
+@if (Vehicle != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.7); z-index: 1050;">
+        <div class="modal-dialog modal-lg modal-dialog-centered shadow-lg">
+            <div class="modal-content border-0 rounded-4 overflow-hidden">
+                <div class="modal-header bg-dark text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold">@Vehicle.Name - Características</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            <div class="position-sticky top-0 h-100">
+                                <img src="@Vehicle.ImageUrl" class="img-fluid h-100" alt="@Vehicle.Name" style="object-fit: cover; min-height: 400px; width: 100%;">
+                            </div>
+                        </div>
+                        <div class="col-md-7 p-4 bg-white">
+                            <h4 class="mb-3 border-bottom pb-2 fw-bold text-dark">Especificaciones Técnicas</h4>
+                            <ul class="list-group list-group-flush mb-4 small">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Año en servicio:</strong> <span>@DisplayYear(Vehicle.Year)</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Tripulantes:</strong> <span>@DisplayNumeric(Vehicle.Crew, "")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Infantería / Pasajeros:</strong> <span>@DisplayNumeric(Vehicle.Passengers, "infantes")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Peso:</strong> <span>@DisplayNumeric(Vehicle.Weight, "t")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Dimensiones:</strong> <span>@GetDimensions(Vehicle)</span>
+                                </li>
+                                <li class="list-group-item d-flex flex-column align-items-start">
+                                    <strong>Motor:</strong> <span>@DisplayString(Vehicle.Engine) @(Vehicle.EnginePower.HasValue ? $"({Vehicle.EnginePower} HP)" : "")</span>
+                                </li>
+                                <li class="list-group-item d-flex flex-column align-items-start">
+                                    <strong>Transmisión:</strong> <span>@DisplayString(Vehicle.Transmission)</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Velocidad (Carretera):</strong> <span>@DisplayNumeric(Vehicle.MaxSpeedRoad, "km/h")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Velocidad (Off-Road):</strong> <span>@DisplayNumeric(Vehicle.MaxSpeedOffRoad, "km/h")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Autonomía:</strong> <span>@DisplayNumeric(Vehicle.Range, "km")</span>
+                                </li>
+                                <li class="list-group-item d-flex flex-column align-items-start">
+                                    <strong>Suspensión:</strong> <span>@DisplayString(Vehicle.Suspension)</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <strong>Producción Total:</strong> <span>@DisplayNumeric(Vehicle.TotalProduced, "unidades")</span>
+                                </li>
+                            </ul>
+
+                            <h4 class="mb-3 border-bottom pb-2 fw-bold text-dark">Armamento y Defensa</h4>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item">
+                                    <strong>Armamento Principal:</strong><br/>
+                                    <span class="text-muted">@DisplayString(Vehicle.MainArmament)</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Armamento Secundario:</strong><br/>
+                                    <span class="text-muted">@DisplayString(Vehicle.SecondaryArmament)</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Blindaje:</strong><br />
+                                    <span class="text-muted">@DisplayString(Vehicle.Armor)</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0 py-3">
+                    <button type="button" class="btn btn-dark px-4 rounded-pill" @onclick="CloseModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public ArmoredVehicle? Vehicle { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task CloseModal() => await OnClose.InvokeAsync();
+
+    private string DisplayNumeric(double? value, string unit) => value.HasValue ? $"{value} {unit}" : "N/D";
+    private string DisplayNumeric(int? value, string unit) => value.HasValue ? $"{value} {unit}" : "N/D";
+    private string DisplayYear(int year) => year == 0 ? "N/D" : year.ToString();
+    private string DisplayString(string? value) => string.IsNullOrWhiteSpace(value) ? "N/D" : value;
+
+    private string GetDimensions(ArmoredVehicle v)
+    {
+        if (!v.Length.HasValue && !v.Width.HasValue && !v.Height.HasValue) return "N/D";
+        return $"{(v.Length?.ToString() ?? "?")} x {(v.Width?.ToString() ?? "?")} x {(v.Height?.ToString() ?? "?")} m";
+    }
+}

@@ -1,0 +1,219 @@
+@page "/admin/edit-vehicle/{id:int}"
+@rendermode InteractiveServer
+@inject IMilitaryDataService DataService
+@inject NavigationManager Navigation
+@inject AdminState AdminState
+
+<PageTitle>Editar Blindado - MilitaryComparator</PageTitle>
+
+<div class="container my-5">
+    @if (!AdminState.IsAuthenticated)
+    {
+        <div class="alert alert-warning text-center">
+            <h3>Acceso denegado</h3>
+            <p>Debes autenticarte en el panel principal primero.</p>
+            <a href="/admin" class="btn btn-primary">Ir al Login</a>
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="d-flex align-items-center mb-4">
+                    <a href="/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <h1 class="mb-0">Editar: @(vehicle?.Name ?? "Cargando...")</h1>
+                </div>
+
+                @if (vehicle != null)
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4 p-md-5">
+                            <EditForm Model="@vehicle" OnValidSubmit="HandleSubmit" FormName="EditVehicleForm">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary class="alert alert-danger" />
+
+                                <div class="row g-4">
+                                    <!-- Información Básica -->
+                                    <div class="col-12">
+                                        <h5 class="border-bottom pb-2 font-weight-bold text-primary">Información General</h5>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Nombre</label>
+                                        <InputText @bind-Value="vehicle.Name" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Año en servicio</label>
+                                        <InputNumber @bind-Value="vehicle.Year" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Tripulantes</label>
+                                        <InputNumber @bind-Value="vehicle.Crew" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Pasajeros</label>
+                                        <InputNumber @bind-Value="vehicle.Passengers" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Nación</label>
+                                        <InputSelect @bind-Value="vehicle.NationId" class="form-select">
+                                            @foreach (var nation in nations)
+                                            {
+                                                <option value="@nation.Id">@nation.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tipo de Vehículo</label>
+                                        <InputSelect @bind-Value="vehicle.VehicleType" class="form-select">
+                                            @foreach (var type in Enum.GetValues<VehicleType>())
+                                            {
+                                                <option value="@type">@type</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+
+                                    <div class="col-12 text-center my-3">
+                                        <img src="@vehicle.ImageUrl" class="rounded shadow-sm mb-3" style="max-height: 200px;" />
+                                        <div class="input-group">
+                                            <span class="input-group-text">URL Imagen</span>
+                                            <InputText @bind-Value="vehicle.ImageUrl" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Dimensiones y Masa -->
+                                    <div class="col-12 mt-4">
+                                        <h5 class="border-bottom pb-2 font-weight-bold text-primary">Dimensiones y Masa</h5>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Longitud (m)</label>
+                                        <InputNumber @bind-Value="vehicle.Length" class="form-control" step="0.01" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Ancho (m)</label>
+                                        <InputNumber @bind-Value="vehicle.Width" class="form-control" step="0.01" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Alto (m)</label>
+                                        <InputNumber @bind-Value="vehicle.Height" class="form-control" step="0.01" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Peso (t)</label>
+                                        <InputNumber @bind-Value="vehicle.Weight" class="form-control" step="0.1" />
+                                    </div>
+
+                                    <!-- Propulsión -->
+                                    <div class="col-12 mt-4">
+                                        <h5 class="border-bottom pb-2 font-weight-bold text-primary">Propulsión y Motores</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Motor</label>
+                                        <InputText @bind-Value="vehicle.Engine" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Potencia (HP)</label>
+                                        <InputNumber @bind-Value="vehicle.EnginePower" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Transmisión</label>
+                                        <InputText @bind-Value="vehicle.Transmission" class="form-control" />
+                                    </div>
+
+                                    <!-- Desempeño -->
+                                    <div class="col-12 mt-4">
+                                        <h5 class="border-bottom pb-2 font-weight-bold text-primary">Rendimiento y Movilidad</h5>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Velocidad Carretera (km/h)</label>
+                                        <InputNumber @bind-Value="vehicle.MaxSpeedRoad" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Velocidad Off-Road (km/h)</label>
+                                        <InputNumber @bind-Value="vehicle.MaxSpeedOffRoad" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Autonomía (km)</label>
+                                        <InputNumber @bind-Value="vehicle.Range" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Suspensión</label>
+                                        <InputText @bind-Value="vehicle.Suspension" class="form-control" />
+                                    </div>
+
+                                    <!-- Armamento -->
+                                    <div class="col-12 mt-4">
+                                        <h5 class="border-bottom pb-2 font-weight-bold text-primary">Armamento y Blindaje</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Armamento Principal</label>
+                                        <InputText @bind-Value="vehicle.MainArmament" class="form-control" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Armamento Secundario</label>
+                                        <InputText @bind-Value="vehicle.SecondaryArmament" class="form-control" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Blindaje (Descripción Técnica)</label>
+                                        <InputTextArea @bind-Value="vehicle.Armor" class="form-control" rows="3" />
+                                    </div>
+
+                                    <!-- Producción -->
+                                    <div class="col-12 mt-4">
+                                        <h5 class="border-bottom pb-2 font-weight-bold text-primary">Historial y Producción</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Unidades Producidas</label>
+                                        <InputNumber @bind-Value="vehicle.TotalProduced" class="form-control" />
+                                    </div>
+
+                                    <div class="col-12 mt-5 pt-3">
+                                        <div class="d-flex justify-content-end gap-3">
+                                            <button type="button" class="btn btn-light px-5" @onclick='() => Navigation.NavigateTo("/admin")'>Cancelar</button>
+                                            <button type="submit" class="btn btn-primary px-5 py-3 shadow">Actualizar Blindado</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private ArmoredVehicle? vehicle;
+    private List<Nation> nations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AdminState.IsAuthenticated)
+        {
+            nations = await DataService.GetAllNationsAsync();
+            vehicle = await DataService.GetVehicleByIdAsync(Id);
+            if (vehicle == null) Navigation.NavigateTo("/admin");
+        }
+        else
+        {
+            Navigation.NavigateTo("/admin");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (vehicle != null)
+        {
+            await DataService.UpdateVehicleAsync(vehicle);
+            Navigation.NavigateTo("/admin");
+        }
+    }
+}

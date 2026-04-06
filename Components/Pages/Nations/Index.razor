@@ -1,0 +1,148 @@
+@page "/nations"
+@rendermode InteractiveServer
+@using MilitaryComparator.Models.Entities
+@using MilitaryComparator.Services
+@using MilitaryComparator.Components.Layout
+@inject IMilitaryDataService MilitaryData
+
+<PageTitle>Naciones - MilitaryComparator</PageTitle>
+
+<div class="container mt-4 mb-5">
+    @if (_selectedNation == null)
+    {
+        <h1 class="mb-4 text-center">Naciones</h1>
+        <p class="lead text-center mb-5">Resumen general de los países disponibles en el comparador.</p>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @if (_nations == null)
+            {
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var nation in _nations)
+                {
+                    <div class="col">
+                        <div class="card h-100 nation-card shadow-sm border-0" @onclick="() => SelectNation(nation)" style="cursor: pointer;">
+                            <img src="@nation.FlagImageUrl" class="card-img-top flag-img" alt="Bandera de @nation.Name">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-2">@nation.Name</h5>
+                                <p class="card-text text-muted text-center small">@nation.Description</p>
+                            </div>
+                            <div class="card-footer bg-white border-0 text-primary fw-bold text-center pb-3">
+                                Ver Blindados <i class="bi bi-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+                <img src="@_selectedNation.FlagImageUrl" class="rounded shadow-sm" style="height: 50px; border: 1px solid #ddd;" />
+                <h1 class="mb-0 fw-bold">Blindados de @_selectedNation.Name</h1>
+            </div>
+            <button class="btn btn-dark rounded-pill px-4 shadow-sm" @onclick="ClearNation">
+                <i class="bi bi-arrow-left"></i> Volver
+            </button>
+        </div>
+
+        @if (_vehiclesOfNation == null)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+        else if (!_vehiclesOfNation.Any())
+        {
+            <div class="alert alert-info py-5 text-center shadow-sm">
+                <i class="bi bi-info-circle fs-2 d-block mb-3 text-primary"></i>
+                <h5 class="fw-bold">Nación sin registros</h5>
+                <p class="mb-0 text-muted">Esta nación aún no tiene vehículos registrados en el sistema.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var vehicle in _vehiclesOfNation)
+                {
+                    <div class="col">
+                        <div class="card h-100 vehicle-card shadow-sm border-0" @onclick="() => ShowDetails(vehicle)" style="cursor: pointer;">
+                            <img src="@vehicle.ImageUrl" class="card-img-top" alt="@vehicle.Name" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-center">@vehicle.Name</h5>
+                                <div class="text-center mb-2">
+                                    <span class="badge bg-secondary">@vehicle.VehicleType</span>
+                                </div>
+                                <p class="small text-center text-muted mb-0">Año en servicio: @(vehicle.Year == 0 ? "N/D" : vehicle.Year)</p>
+                            </div>
+                            <div class="card-footer bg-white border-0 pb-3 text-center">
+                                <span class="text-primary small fw-bold">Ver Detalles Técnicos <i class="bi bi-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@* Componente Reutilizable para los detalles *@
+<VehicleDetailsModal Vehicle="_selectedVehicle" OnClose="CloseDetails" />
+
+<style>
+    .nation-card, .vehicle-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .nation-card:hover, .vehicle-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+    }
+
+    .flag-img {
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .lead { color: #666; font-size: 1.1rem; }
+    h1 { font-weight: 800; color: #212529; }
+</style>
+
+@code {
+    private List<Nation>? _nations;
+    private Nation? _selectedNation;
+    private List<ArmoredVehicle>? _vehiclesOfNation;
+    private ArmoredVehicle? _selectedVehicle;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nations = await MilitaryData.GetAllNationsAsync();
+    }
+
+    private async Task SelectNation(Nation nation)
+    {
+        _selectedNation = nation;
+        _vehiclesOfNation = null;
+        _vehiclesOfNation = await MilitaryData.GetVehiclesByNationAsync(nation.Id);
+    }
+
+    private void ClearNation()
+    {
+        _selectedNation = null;
+        _vehiclesOfNation = null;
+    }
+
+    private void ShowDetails(ArmoredVehicle v) => _selectedVehicle = v;
+    private void CloseDetails() => _selectedVehicle = null;
+}

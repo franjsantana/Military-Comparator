@@ -1,0 +1,176 @@
+@page "/vehicles"
+@rendermode InteractiveServer
+@using MilitaryComparator.Models.Entities
+@using MilitaryComparator.Models.Enums
+@using MilitaryComparator.Services
+@using MilitaryComparator.Components.Layout
+@inject IMilitaryDataService MilitaryData
+
+<PageTitle>Blindados - MilitaryComparator</PageTitle>
+
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4 text-center fw-bold">Vehículos Blindados</h1>
+
+    <div class="category-selector mb-5 d-flex justify-content-center flex-wrap gap-2 gap-md-3">
+        @foreach (var type in Enum.GetValues<VehicleType>())
+        {
+            @if (type != VehicleType.IFV) // No mostramos IFV separado porque lo combinamos con APC
+            {
+                <button class="btn @GetBtnClass(type)" @onclick="() => SelectType(type)">
+                    <i class="@GetIcon(type)"></i> @GetTypeName(type)
+                </button>
+            }
+        }
+    </div>
+
+    <div class="role-description p-4 mb-5 rounded-4 shadow-sm text-center bg-light" style="border-left: 6px solid #212529;">
+        <h3 class="fw-bold">@_currentTypeDescription.Title</h3>
+        <p class="lead mb-0 text-muted">@_currentTypeDescription.Description</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @if (_filteredVehicles == null)
+        {
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        }
+        else if (!_filteredVehicles.Any())
+        {
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info shadow-sm rounded-4">
+                    <i class="bi bi-info-circle fs-3 d-block mb-3"></i>
+                    No hay vehículos registrados en esta categoría aún.
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var vehicle in _filteredVehicles)
+            {
+                <div class="col">
+                    <div class="card h-100 vehicle-card border-0 shadow-sm" @onclick="() => ShowDetails(vehicle)" style="cursor: pointer;">
+                        <div class="position-relative overflow-hidden">
+                            <img src="@vehicle.ImageUrl" class="card-img-top" alt="@vehicle.Name" style="height: 240px; object-fit: cover;">
+                            <div class="badge-overlay position-absolute bottom-0 start-0 p-3 w-100" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                                <span class="badge bg-warning text-dark shadow-sm">@vehicle.Nation?.Name</span>
+                            </div>
+                        </div>
+                        <div class="card-body bg-white text-center">
+                            <h5 class="card-title fw-bold mb-0">@vehicle.Name</h5>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@* Modal Reutilizable *@
+<VehicleDetailsModal Vehicle="_selectedVehicle" OnClose="CloseDetails" />
+
+<style>
+    .category-selector .btn {
+        padding: 10px 25px;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .vehicle-card {
+        border-radius: 18px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .vehicle-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2) !important;
+    }
+
+    .vehicle-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .vehicle-card img {
+        transition: transform 0.5s ease;
+    }
+</style>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? selectedId { get; set; }
+
+    private List<ArmoredVehicle>? _allVehicles;
+    private List<ArmoredVehicle>? _filteredVehicles;
+    private VehicleType _selectedType = VehicleType.MBT;
+    private ArmoredVehicle? _selectedVehicle;
+
+    private struct TypeDescription { public string Title; public string Description; }
+
+    private Dictionary<VehicleType, TypeDescription> _descriptions = new()
+    {
+        { VehicleType.MBT, new TypeDescription { Title = "Main Battle Tank (MBT)", Description = "El tanque principal de batalla es la espina dorsal de las fuerzas blindadas modernas." } },
+        { VehicleType.APC, new TypeDescription { Title = "APC / IFV", Description = "Transportes blindados de personal y vehículos de combate de infantería." } },
+        { VehicleType.Wheeled, new TypeDescription { Title = "Vehículos Blindados de Ruedas", Description = "Vehículos de combate rápidos y versátiles optimizados para la movilidad por carretera." } }
+    };
+
+    private TypeDescription _currentTypeDescription => _descriptions.ContainsKey(_selectedType) ? _descriptions[_selectedType] : new TypeDescription { Title = "Blindados", Description = "Explora el catálogo de blindados." };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allVehicles = await MilitaryData.GetAllVehiclesAsync();
+        FilterVehicles();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (selectedId.HasValue && _allVehicles != null)
+        {
+            var target = _allVehicles.FirstOrDefault(v => v.Id == selectedId.Value);
+            if (target != null)
+            {
+                _selectedVehicle = target;
+                _selectedType = target.VehicleType;
+                FilterVehicles();
+            }
+        }
+    }
+
+    private void SelectType(VehicleType type)
+    {
+        _selectedType = type;
+        FilterVehicles();
+    }
+
+    private void FilterVehicles()
+    {
+        if (_allVehicles != null)
+        {
+            if (_selectedType == VehicleType.APC)
+            {
+                _filteredVehicles = _allVehicles.Where(v => v.VehicleType == VehicleType.APC || v.VehicleType == VehicleType.IFV).ToList();
+            }
+            else
+            {
+                _filteredVehicles = _allVehicles.Where(v => v.VehicleType == _selectedType).ToList();
+            }
+        }
+    }
+
+    private string GetBtnClass(VehicleType type) => _selectedType == type ? "btn-dark shadow" : "btn-outline-dark";
+    
+    private string GetIcon(VehicleType type) => type switch {
+        VehicleType.MBT => "bi bi-shield-fill",
+        VehicleType.APC => "bi bi-people-fill",
+        VehicleType.Wheeled => "bi bi-truck",
+        _ => "bi bi-gear"
+    };
+
+    private string GetTypeName(VehicleType type) => type == VehicleType.APC ? "APC / IFV" : type.ToString();
+
+    private void ShowDetails(ArmoredVehicle v) => _selectedVehicle = v;
+    private void CloseDetails() => _selectedVehicle = null;
+}

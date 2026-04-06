@@ -1,0 +1,224 @@
+@page "/admin"
+@rendermode InteractiveServer
+@inject IMilitaryDataService DataService
+@inject NavigationManager Navigation
+@inject AdminState AdminState
+
+<PageTitle>Panel de Administración - MilitaryComparator</PageTitle>
+
+<div class="container my-5">
+    @if (!AdminState.IsAuthenticated)
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4 text-center">
+                <div class="admin-login-card p-5 rounded shadow-lg">
+                    <i class="bi bi-shield-lock display-1 mb-4 text-primary"></i>
+                    <h2 class="mb-4">Acceso Restringido</h2>
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Frase de Acceso</label>
+                        <input type="password" class="form-control form-control-lg" @bind="passphrase" @onkeyup="HandleKeyUp" placeholder="Introduce la clave..." />
+                    </div>
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mb-3">@errorMessage</div>
+                    }
+                    <button class="btn btn-primary btn-lg w-100 py-3" @onclick="Authenticate">Entrar al Panel</button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="display-4 fw-bold mb-0">Panel de Control</h1>
+                <p class="text-muted">Gestiona el inventario global de vehículos y naciones.</p>
+            </div>
+            <button class="btn btn-outline-danger px-4" @onclick="Logout">Cerrar Sesión</button>
+        </div>
+
+        <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item">
+                <button class='nav-link @(activeTab == "vehicles" ? "active" : "")' @onclick='() => activeTab = "vehicles"'>Vehículos</button>
+            </li>
+            <li class="nav-item">
+                <button class='nav-link @(activeTab == "nations" ? "active" : "")' @onclick='() => activeTab = "nations"'>Naciones</button>
+            </li>
+        </ul>
+
+        <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+            <div class="card-body p-0">
+                @if (activeTab == "vehicles")
+                {
+                    <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Lista de Blindados</h3>
+                        <a href="/admin/add-vehicle" class="btn btn-success">+ Nuevo Vehículo</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Imagen</th>
+                                    <th>Nombre</th>
+                                    <th>País</th>
+                                    <th>Tipo</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var v in vehicles)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            <img src="@v.ImageUrl" class="rounded" style="width: 60px; height: 40px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/60x40?text=No+Img'" />
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">@v.Name</div>
+                                        </td>
+                                        <td>@v.Nation?.Name</td>
+                                        <td><span class="badge bg-secondary">@v.VehicleType</span></td>
+                                        <td class="text-end pe-4">
+                                            <button class="btn btn-sm btn-outline-primary me-2" @onclick='() => EditVehicle(v.Id)' title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-2" @onclick='() => DuplicateVehicle(v.Id)' title="Duplicar">
+                                                <i class="bi bi-files"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteVehicle(v.Id)' title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Lista de Naciones</h3>
+                        <a href="/admin/add-nation" class="btn btn-primary">+ Nueva Nación</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Bandera</th>
+                                    <th>Nombre</th>
+                                    <th>Vehículos</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var n in nations)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            <img src="@n.FlagImageUrl" style="width: 40px; border: 1px solid #ddd;" />
+                                        </td>
+                                        <td class="fw-bold">@n.Name</td>
+                                        <td>@n.Vehicles.Count</td>
+                                        <td class="text-end pe-4">
+                                            <button class="btn btn-sm btn-outline-primary me-2" @onclick='() => EditNation(n.Id)'>
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteNation(n.Id)'>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .admin-login-card {
+        background-color: #1a1e21;
+        color: white;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+
+@code {
+    private string passphrase = "";
+    private string errorMessage = "";
+    private string activeTab = "vehicles";
+    private List<Nation> nations = new();
+    private List<ArmoredVehicle> vehicles = new();
+
+    private const string AdminSecret = "Military2024";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AdminState.IsAuthenticated)
+        {
+            await RefreshData();
+        }
+    }
+
+    private async Task Authenticate()
+    {
+        if (passphrase == AdminSecret)
+        {
+            AdminState.Authenticate();
+            errorMessage = "";
+            await RefreshData();
+        }
+        else
+        {
+            errorMessage = "Frase de acceso incorrecta.";
+        }
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Authenticate();
+    }
+
+    private async Task RefreshData()
+    {
+        nations = await DataService.GetAllNationsAsync();
+        vehicles = await DataService.GetAllVehiclesAsync();
+    }
+
+    private void Logout()
+    {
+        AdminState.Logout();
+        passphrase = "";
+    }
+
+    private void EditVehicle(int id) => Navigation.NavigateTo($"/admin/edit-vehicle/{id}");
+    private void DuplicateVehicle(int id) => Navigation.NavigateTo($"/admin/add-vehicle?sourceId={id}");
+    private void EditNation(int id) => Navigation.NavigateTo($"/admin/edit-nation/{id}");
+
+    private async Task DeleteVehicle(int id)
+    {
+        await DataService.DeleteVehicleAsync(id);
+        await RefreshData();
+    }
+
+    private async Task DeleteNation(int id)
+    {
+        await DataService.DeleteNationAsync(id);
+        await RefreshData();
+    }
+}

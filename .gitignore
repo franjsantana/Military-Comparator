@@ -1,0 +1,16 @@
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+.DS_Store
+
+# Local database file (optional, depends if you want to push your local changes)
+# military.db
+
+# Azure personal settings
+.azure/
+publish/
+output/

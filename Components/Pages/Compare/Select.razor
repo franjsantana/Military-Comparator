@@ -1,0 +1,114 @@
+@page "/comparator/select/{slotIndex:int}"
+@rendermode InteractiveServer
+@using MilitaryComparator.Services
+@using MilitaryComparator.Models.Entities
+@inject IMilitaryDataService MilitaryData
+@inject ComparisonState State
+@inject NavigationManager Nav
+
+<PageTitle>Seleccionar Blindado - MilitaryComparator</PageTitle>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Seleccionar Blindado (Espacio @(slotIndex + 1))</h2>
+        <button class="btn btn-outline-secondary" @onclick="GoBack">Cancelar</button>
+    </div>
+
+    @if (_selectedNation == null)
+    {
+        <h4 class="mb-4">Paso 1: Selecciona una Nación</h4>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            @if (_nations != null)
+            {
+                @foreach (var nation in _nations)
+                {
+                    <div class="col">
+                        <div class="card h-100 nation-select-card shadow-sm" @onclick="() => SelectNation(nation)">
+                            <img src="@nation.FlagImageUrl" class="card-img-top nation-flag-sm" alt="@nation.Name">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">@nation.Name</h5>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="d-flex align-items-center mb-4 gap-3 bg-light p-3 rounded">
+            <img src="@_selectedNation.FlagImageUrl" class="nation-flag-tiny" alt="@_selectedNation.Name">
+            <h4 class="mb-0">Paso 2: Selecciona un Blindado de <strong>@_selectedNation.Name</strong></h4>
+            <button class="btn btn-sm btn-link" @onclick="() => _selectedNation = null">Cambiar Nación</button>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @if (_vehiclesOfNation != null)
+            {
+                @if (!_vehiclesOfNation.Any())
+                {
+                    <div class="col-12 text-center py-4">
+                        <div class="alert alert-info">No hay vehículos registrados para esta nación.</div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var vehicle in _vehiclesOfNation)
+                    {
+                        <div class="col">
+                            <div class="card h-100 vehicle-select-card shadow-sm" @onclick="() => SelectVehicle(vehicle)">
+                                <img src="@vehicle.ImageUrl" class="card-img-top vehicle-img-sm" alt="@vehicle.Name">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">@vehicle.Name</h5>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .nation-select-card, .vehicle-select-card {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .nation-select-card:hover, .vehicle-select-card:hover {
+        transform: translateY(-5px);
+        border-color: #0d6efd;
+    }
+
+    .nation-flag-sm { height: 120px; object-fit: cover; }
+    .nation-flag-tiny { height: 40px; border: 1px solid #ccc; }
+    .vehicle-img-sm { height: 150px; object-fit: cover; }
+</style>
+
+@code {
+    [Parameter] public int slotIndex { get; set; }
+
+    private List<Nation>? _nations;
+    private Nation? _selectedNation;
+    private List<ArmoredVehicle>? _vehiclesOfNation;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nations = await MilitaryData.GetAllNationsAsync();
+    }
+
+    private async Task SelectNation(Nation nation)
+    {
+        _selectedNation = nation;
+        _vehiclesOfNation = await MilitaryData.GetVehiclesByNationAsync(nation.Id);
+    }
+
+    private void SelectVehicle(ArmoredVehicle vehicle)
+    {
+        State.AddVehicle(vehicle);
+        Nav.NavigateTo("/comparator");
+    }
+
+    private void GoBack() => Nav.NavigateTo("/comparator");
+}

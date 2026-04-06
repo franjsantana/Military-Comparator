@@ -1,0 +1,108 @@
+/* Eliminar cualquier estilo de barra lateral */
+.main-nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bi {
+    display: inline-block;
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+    background-size: cover;
+    vertical-align: middle;
+}
+
+.nav-text {
+    vertical-align: middle;
+}
+
+/* Iconos SVG */
+.bi-house-door-fill-nav-menu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-house-door-fill' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5Z'/%3E%3C/svg%3E");
+}
+
+.bi-globe-nav-menu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-globe' viewBox='0 0 16 16'%3E%3Cpath d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.303-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 1.077V4h2.355a7.97 7.97 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077zM12.418 4a9.27 9.27 0 0 1-.64-1.539 6.688 6.688 0 0 1-.597-.933A7.024 7.024 0 0 1 13.745 4h-1.327zM12.18 7.5c-.03-.877-.138-1.718-.312-2.5h2.49c.062.89.291 1.733.656 2.5h-2.834zM11.153 11a13.663 13.663 0 0 1 .312 2.5h2.49a6.952 6.952 0 0 0-.656-2.5h-2.146zm.312-6c.174.782.282 1.623.312 2.5h2.834a6.961 6.961 0 0 0-.656-2.5h-2.49zm0 3.5c-.03.877-.138 1.718-.312 2.5h2.146a6.97 6.97 0 0 0 .656-2.5h-2.49z'/%3E%3C/svg%3E");
+}
+
+.bi-shield-shaded-nav-menu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-shield-shaded' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 14.933a.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067v13.866zM5.072.56c.957.257 1.61.4 2.158.5V1.067c0-.015 0-.014 0 0h.01c.01 0 .014 0 .015 0v13.866V15s.014 0 .015 0a.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067v-.38a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C3.852.145 2.831-.077 2.3-.077v1.144c.531 0 1.552.223 2.637.518.107.03.213.059.319.088-.13.318-.285.645-.46 1.068-.552 1.035-1.218 1.65-1.887 1.855V.56z'/%3E%3C/svg%3E");
+}
+
+.bi-arrow-left-right-nav-menu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-arrow-left-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z'/%3E%3C/svg%3E");
+}
+
+/* Estilos de los enlaces */
+.nav-item {
+    font-size: 0.95rem;
+}
+
+.nav-item ::deep .nav-link {
+    color: #e0e0e0;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-item ::deep a.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-weight: 500;
+}
+
+.nav-item ::deep .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Responsive: en móvil, el menú se adapta */
+@media (max-width: 768px) {
+    .nav {
+        gap: 0.25rem;
+    }
+
+    .nav-text {
+        display: none;
+        /* Oculta el texto en móvil, solo muestra iconos */
+    }
+
+    .bi {
+        margin-right: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .nav-item ::deep .nav-link {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-item ::deep .nav-link {
+        padding: 0.4rem;
+    }
+
+    .bi {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+}

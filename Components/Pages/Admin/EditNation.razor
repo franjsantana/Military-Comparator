@@ -1,0 +1,90 @@
+@page "/admin/edit-nation/{id:int}"
+@rendermode InteractiveServer
+@inject IMilitaryDataService DataService
+@inject NavigationManager Navigation
+@inject AdminState AdminState
+
+<PageTitle>Editar Nación - MilitaryComparator</PageTitle>
+
+<div class="container my-5">
+    @if (!AdminState.IsAuthenticated)
+    {
+        <div class="alert alert-warning text-center">
+            <h3>Acceso denegado</h3>
+            <p>Debes autenticarte en el panel principal primero.</p>
+            <a href="/admin" class="btn btn-primary">Ir al Login</a>
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-4">
+                    <a href="/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <h1 class="mb-0">Editar Nación</h1>
+                </div>
+
+                @if (nation != null)
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <EditForm Model="@nation" OnValidSubmit="HandleSubmit" FormName="EditNationForm">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary class="alert alert-danger" />
+
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del País</label>
+                                    <InputText @bind-Value="nation.Name" class="form-control" />
+                                </div>
+
+                                <div class="mb-3 text-center">
+                                    <img src="@nation.FlagImageUrl" style="width: 100px; border: 1px solid #ddd;" class="mb-2" />
+                                    <InputText @bind-Value="nation.FlagImageUrl" class="form-control" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <InputTextArea @bind-Value="nation.Description" class="form-control" rows="4" />
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-light" @onclick='() => Navigation.NavigateTo("/admin")'>Cancelar</button>
+                                    <button type="submit" class="btn btn-primary px-4">Guardar Cambios</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Nation? nation;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AdminState.IsAuthenticated)
+        {
+            nation = await DataService.GetNationByIdAsync(Id);
+            if (nation == null) Navigation.NavigateTo("/admin");
+        }
+        else
+        {
+            Navigation.NavigateTo("/admin");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (nation != null)
+        {
+            await DataService.UpdateNationAsync(nation);
+            Navigation.NavigateTo("/admin");
+        }
+    }
+}

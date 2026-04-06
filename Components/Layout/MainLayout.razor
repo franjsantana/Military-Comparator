@@ -1,0 +1,28 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <header class="top-row px-4">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <a class="navbar-brand" href="">MilitaryComparator</a>
+            <NavMenu />
+        </div>
+    </header>
+
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+
+    <footer class="text-center py-4 text-muted">
+        <div class="container border-top pt-3">
+            <small>&copy; 2024 MilitaryComparator - <a href="/admin" class="text-decoration-none text-muted" style="opacity: 0.3;">Admin</a></small>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

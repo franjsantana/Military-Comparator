@@ -1,0 +1,186 @@
+@page "/comparator/results"
+@rendermode InteractiveServer
+@using MilitaryComparator.Services
+@using MilitaryComparator.Models.Entities
+@inject ComparisonState State
+@inject NavigationManager Nav
+
+<PageTitle>Resultados de la Comparación - MilitaryComparator</PageTitle>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Comparación de Blindados</h1>
+        <button class="btn btn-outline-primary" @onclick="GoBack">Volver al Comparador</button>
+    </div>
+
+    @if (State.SelectedVehicles.Count < 2)
+
+    {
+        <div class="alert alert-danger">
+            Se necesitan al menos 2 vehículos para mostrar los resultados de la comparación.
+            <button class="btn btn-link" @onclick="GoBack">Volver</button>
+        </div>
+    }
+
+    else
+
+    {
+        <div class="table-responsive shadow rounded">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="sticky-col text-uppercase align-middle"
+                            style="position: sticky; left: 0; z-index: 10; background: #212529;">Atributo</th>
+                        @foreach (var vehicle in State.SelectedVehicles)
+
+                        {
+                            <th class="text-center align-middle" style="min-width: 200px;">
+                                <img src="@vehicle.ImageUrl" class="img-thumbnail mb-2"
+                                    style="height: 100px; width: 150px; object-fit: cover;">
+                                <div class="fw-bold">@vehicle.Name</div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Año en servicio</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@(vehicle.Year == 0 ? "N/D" : vehicle.Year)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Tripulantes</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@(vehicle.Crew == 0 ? "N/D" : vehicle.Crew)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Infante / Pasajero</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayValue(vehicle.Passengers)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Peso (t)</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayValue(vehicle.Weight)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Dimensiones (L x A x H)</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@GetDimensions(vehicle)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Motor</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayString(vehicle.Engine) @(vehicle.EnginePower.HasValue ? $"({vehicle.EnginePower} HP)" : "")</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Transmisión</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayString(vehicle.Transmission)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Velocidad Máx (Vía)</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayValue(vehicle.MaxSpeedRoad) km/h</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Velocidad Máx (Off-Road)</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayValue(vehicle.MaxSpeedOffRoad) km/h</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Suspensión</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayString(vehicle.Suspension)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Autonomía (km)</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayValue(vehicle.Range)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Armamento Principal</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center small">@DisplayString(vehicle.MainArmament)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Armamento Secundario</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center small">@DisplayString(vehicle.SecondaryArmament)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Blindaje</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center small">@DisplayString(vehicle.Armor)</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="sticky-col fw-bold bg-light" style="position: sticky; left: 0; z-index: 5;">Producción Total</td>
+                        @foreach (var vehicle in State.SelectedVehicles)
+                        {
+                            <td class="text-center">@DisplayValue(vehicle.TotalProduced)</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    @inject IMilitaryDataService MilitaryData
+
+
+    private List<Nation>? _nations;
+
+
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        _nations = await MilitaryData.GetAllNationsAsync();
+
+    }
+
+
+
+    private void GoBack() => Nav.NavigateTo("/comparator");
+
+    private string DisplayValue(double? value) => value.HasValue ? value.ToString()! : "N/D";
+    private string DisplayValue(int? value) => value.HasValue ? value.ToString()! : "N/D";
+    private string DisplayString(string? value) => string.IsNullOrWhiteSpace(value) ? "N/D" : value;
+
+    private string GetDimensions(ArmoredVehicle v)
+    {
+        if (!v.Length.HasValue && !v.Width.HasValue && !v.Height.HasValue) return "N/D";
+        return $"{(v.Length?.ToString() ?? "?")} x {(v.Width?.ToString() ?? "?")} x {(v.Height?.ToString() ?? "?")} m";
+    }
+}
