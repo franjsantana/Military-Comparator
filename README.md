@@ -63,4 +63,4 @@ Este proyecto utiliza **SQLite** como base de datos. Si lo subes a Azure App Ser
 
 ---
 
-Generado con ❤️ por **Antigravity AI**.
+
