@@ -47,13 +47,6 @@ Si deseas ejecutar el proyecto en tu máquina local:
 
 ---
 
-## 🔐 Acceso de Administrador
-
-Para gestionar el contenido de la web, puedes acceder a la sección `/admin`.
-*   **Clave Maestra**: `Military2024` (Configurable en `AdminState.cs`).
-
----
-
 ## ☁️ Notas para Despliegue en Azure
 
 Este proyecto utiliza **SQLite** como base de datos. Si lo subes a Azure App Service (Linux), asegúrate de:

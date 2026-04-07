@@ -8,6 +8,7 @@
 
 <div class="container my-5">
     @if (!AdminState.IsAuthenticated)
+
     {
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4 text-center">
@@ -16,7 +17,8 @@
                     <h2 class="mb-4">Acceso Restringido</h2>
                     <div class="mb-3 text-start">
                         <label class="form-label">Frase de Acceso</label>
-                        <input type="password" class="form-control form-control-lg" @bind="passphrase" @onkeyup="HandleKeyUp" placeholder="Introduce la clave..." />
+                        <input type="password" class="form-control form-control-lg" @bind="passphrase"
+                            @onkeyup="HandleKeyUp" placeholder="Introduce la clave..." />
                     </div>
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
@@ -27,7 +29,9 @@
             </div>
         </div>
     }
+
     else
+
     {
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
@@ -39,16 +43,19 @@
 
         <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
             <li class="nav-item">
-                <button class='nav-link @(activeTab == "vehicles" ? "active" : "")' @onclick='() => activeTab = "vehicles"'>Vehículos</button>
+                <button class='nav-link @(activeTab == "vehicles" ? "active" : "")'
+                    @onclick='() => activeTab = "vehicles"'>Vehículos</button>
             </li>
             <li class="nav-item">
-                <button class='nav-link @(activeTab == "nations" ? "active" : "")' @onclick='() => activeTab = "nations"'>Naciones</button>
+                <button class='nav-link @(activeTab == "nations" ? "active" : "")'
+                    @onclick='() => activeTab = "nations"'>Naciones</button>
             </li>
         </ul>
 
         <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
             <div class="card-body p-0">
                 @if (activeTab == "vehicles")
+
                 {
                     <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">Lista de Blindados</h3>
@@ -67,10 +74,13 @@
                             </thead>
                             <tbody>
                                 @foreach (var v in vehicles)
+
                                 {
                                     <tr>
                                         <td class="ps-4">
-                                            <img src="@v.ImageUrl" class="rounded" style="width: 60px; height: 40px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/60x40?text=No+Img'" />
+                                            <img src="@v.ImageUrl" class="rounded"
+                                                style="width: 60px; height: 40px; object-fit: cover;"
+                                                onerror="this.src='https://via.placeholder.com/60x40?text=No+Img'" />
                                         </td>
                                         <td>
                                             <div class="fw-bold">@v.Name</div>
@@ -78,13 +88,16 @@
                                         <td>@v.Nation?.Name</td>
                                         <td><span class="badge bg-secondary">@v.VehicleType</span></td>
                                         <td class="text-end pe-4">
-                                            <button class="btn btn-sm btn-outline-primary me-2" @onclick='() => EditVehicle(v.Id)' title="Editar">
+                                            <button class="btn btn-sm btn-outline-primary me-2" @onclick='() => EditVehicle(v.Id)'
+                                                title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-info me-2" @onclick='() => DuplicateVehicle(v.Id)' title="Duplicar">
+                                            <button class="btn btn-sm btn-outline-info me-2" @onclick='() => DuplicateVehicle(v.Id)'
+                                                title="Duplicar">
                                                 <i class="bi bi-files"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteVehicle(v.Id)' title="Eliminar">
+                                            <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteVehicle(v.Id)'
+                                                title="Eliminar">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -94,7 +107,9 @@
                         </table>
                     </div>
                 }
+
                 else
+
                 {
                     <div class="p-4 bg-light border-bottom d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">Lista de Naciones</h3>
@@ -112,6 +127,7 @@
                             </thead>
                             <tbody>
                                 @foreach (var n in nations)
+
                                 {
                                     <tr>
                                         <td class="ps-4">
@@ -142,7 +158,7 @@
     .admin-login-card {
         background-color: #1a1e21;
         color: white;
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .table th {
@@ -160,65 +176,126 @@
 
 @code {
     private string passphrase = "";
+
     private string errorMessage = "";
+
     private string activeTab = "vehicles";
+
     private List<Nation> nations = new();
+
     private List<ArmoredVehicle> vehicles = new();
 
-    private const string AdminSecret = "Military2024";
+
+
+    private const string AdminSecret = "Military2025";
+
+
 
     protected override async Task OnInitializedAsync()
+
     {
+
         if (AdminState.IsAuthenticated)
+
         {
+
             await RefreshData();
+
         }
+
     }
+
+
 
     private async Task Authenticate()
+
     {
+
         if (passphrase == AdminSecret)
+
         {
+
             AdminState.Authenticate();
+
             errorMessage = "";
+
             await RefreshData();
+
         }
+
         else
+
         {
+
             errorMessage = "Frase de acceso incorrecta.";
+
         }
+
     }
+
+
 
     private async Task HandleKeyUp(KeyboardEventArgs e)
+
     {
+
         if (e.Key == "Enter") await Authenticate();
+
     }
+
+
 
     private async Task RefreshData()
+
     {
+
         nations = await DataService.GetAllNationsAsync();
+
         vehicles = await DataService.GetAllVehiclesAsync();
+
     }
+
+
 
     private void Logout()
+
     {
+
         AdminState.Logout();
+
         passphrase = "";
+
     }
+
+
 
     private void EditVehicle(int id) => Navigation.NavigateTo($"/admin/edit-vehicle/{id}");
+
     private void DuplicateVehicle(int id) => Navigation.NavigateTo($"/admin/add-vehicle?sourceId={id}");
+
     private void EditNation(int id) => Navigation.NavigateTo($"/admin/edit-nation/{id}");
 
+
+
     private async Task DeleteVehicle(int id)
+
     {
+
         await DataService.DeleteVehicleAsync(id);
+
         await RefreshData();
+
     }
 
+
+
     private async Task DeleteNation(int id)
+
     {
+
         await DataService.DeleteNationAsync(id);
+
         await RefreshData();
+
     }
 }
